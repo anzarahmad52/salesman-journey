@@ -1,0 +1,132 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2025-05-05 13:51:08.859014",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "salesman",
+  "journey_plan",
+  "visit_date",
+  "check_in_time",
+  "check_out_time",
+  "location",
+  "remarks",
+  "outcome",
+  "next_visit_date",
+  "linked_order",
+  "amended_from",
+  "column_break_ljun",
+  "customer"
+ ],
+ "fields": [
+  {
+   "fieldname": "salesman",
+   "fieldtype": "Link",
+   "label": "Salesman",
+   "options": "User"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "journey_plan",
+   "fieldtype": "Link",
+   "label": "Journey Plan",
+   "options": "Journey Plan Template"
+  },
+  {
+   "fieldname": "visit_date",
+   "fieldtype": "Date",
+   "label": "Visit Date"
+  },
+  {
+   "fieldname": "check_in_time",
+   "fieldtype": "Datetime",
+   "label": "Check-In Time"
+  },
+  {
+   "fieldname": "check_out_time",
+   "fieldtype": "Datetime",
+   "label": "Check-Out Time"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location (Lat/Long)"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "outcome",
+   "fieldtype": "Select",
+   "label": "Outcome",
+   "options": "Order\nNo Order\nComplaint\nInfo Only"
+  },
+  {
+   "fieldname": "next_visit_date",
+   "fieldtype": "Date",
+   "label": "Next Visit Date"
+  },
+  {
+   "fieldname": "linked_order",
+   "fieldtype": "Link",
+   "label": "Linked Order",
+   "options": "Sales Order"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Visit Log",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Series",
+   "options": "SVL-.DD.-.MM.-.YY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ljun",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "links": [],
+ "modified": "2025-09-18 10:44:24.625867",
+ "modified_by": "Administrator",
+ "module": "Salesman Journey",
+ "name": "Sales Visit Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

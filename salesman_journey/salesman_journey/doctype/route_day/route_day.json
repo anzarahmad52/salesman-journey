@@ -1,0 +1,50 @@
+{
+  "actions": [],
+  "creation": "2025-05-05 13:51:08.522393",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "day_of_week",
+    "customer",
+    "time_slot",
+    "expected_duration"
+  ],
+  "fields": [
+    {
+      "fieldname": "day_of_week",
+      "fieldtype": "Select",
+      "label": "Day of Week",
+      "options": "Monday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "customer",
+      "fieldtype": "Link",
+      "label": "Customer",
+      "options": "Customer",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "time_slot",
+      "fieldtype": "Data",
+      "label": "Time Slot",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "expected_duration",
+      "fieldtype": "Duration",
+      "label": "Expected Duration"
+    }
+  ],
+  "istable": 1,
+  "links": [],
+  "modified": "2025-08-17 16:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Salesman Journey",
+  "name": "Route Day",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
+}

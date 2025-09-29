@@ -1,0 +1,18 @@
+{
+  "doctype": "Report",
+  "name": "Salesman Daily Stock Closing",
+  "report_name": "Salesman Daily Stock Closing",
+  "ref_doctype": "Stock Ledger Entry",
+  "module": "Salesman Journey",
+  "is_standard": "Yes",
+  "report_type": "Script Report",
+  "roles": [
+    {"role": "System Manager"},
+    {"role": "Stock User"},
+    {"role": "Sales User"},
+    {"role": "Sales Supervisor"},
+    {"role": "Accounts User"},
+    {"role": "Sales Manager"},
+    {"role": "Stock Manager"}
+  ]
+}

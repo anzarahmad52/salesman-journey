@@ -44,6 +44,11 @@ app_license = "mit"
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
+# include js in doctype views
+doctype_js = {
+    "Sales Visit Log": "public/js/sales_visit_log.js",
+    "Journey Plan Template": "salesman_journey/salesman_journey/doctype/journey_plan_template/journey_plan_template.js"
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -144,10 +149,21 @@ app_license = "mit"
 # 		"on_trash": "method"
 # 	}
 # }
+doc_events = {
+    "Material Request": {
+        "after_insert": "salesman_journey.api.material_request_alerts.on_mr_created",
+        "on_submit": "salesman_journey.api.material_request_alerts.on_mr_created",
+    }
+}
+
 
 # Scheduled Tasks
 # ---------------
-
+scheduler_events = {
+    "daily": [
+        "salesman_journey.api.autocreate.create_sales_visit_logs_for_today"
+    ]
+}
 # scheduler_events = {
 # 	"all": [
 # 		"salesman_journey.tasks.all"
@@ -177,6 +193,9 @@ app_license = "mit"
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "salesman_journey.event.get_events"
 # }
+override_whitelisted_methods = {
+    "salesman_journey.api.dashboard.get_new_events": "salesman_journey.api.dashboard.get_new_events"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
@@ -241,4 +260,4 @@ app_license = "mit"
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-
+import salesman_journey.api.checkin

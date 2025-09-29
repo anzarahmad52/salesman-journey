@@ -1,0 +1,150 @@
+{
+  "actions": [],
+  "autoname": "naming_series:",
+  "creation": "2025-05-05 13:51:08.191403",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "naming_series",
+    "salesman",
+    "start_date",
+    "status",
+    "column_break_pyyz",
+    "territory",
+    "end_date",
+    "frequency",
+    "amended_from",
+    "section_break_dcwj",
+    "route_days"
+  ],
+  "fields": [
+    {
+      "fieldname": "salesman",
+      "fieldtype": "Link",
+      "label": "Salesman",
+      "options": "User",
+      "reqd": 1,
+      "search_index": 1
+    },
+    {
+      "fieldname": "territory",
+      "fieldtype": "Link",
+      "label": "Territory",
+      "options": "Territory",
+      "reqd": 1,
+      "search_index": 1
+    },
+    {
+      "fieldname": "start_date",
+      "fieldtype": "Date",
+      "label": "Start Date",
+      "reqd": 1
+    },
+    {
+      "fieldname": "end_date",
+      "fieldtype": "Date",
+      "label": "End Date"
+    },
+    {
+      "fieldname": "frequency",
+      "fieldtype": "Select",
+      "label": "Frequency",
+      "options": "Daily\nWeekly\nMonthly",
+      "default": "Weekly"
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Draft\nSubmitted\nActive\nInactive",
+      "default": "Draft"
+    },
+    {
+      "fieldname": "route_days",
+      "fieldtype": "Table",
+      "label": "Route Days",
+      "options": "Route Day"
+    },
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "no_copy": 1,
+      "options": "Journey Plan Template",
+      "print_hide": 1,
+      "read_only": 1,
+      "search_index": 1
+    },
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "hidden": 1,
+      "label": "Naming Series",
+      "options": "JPT-.YYYY.-.MM.-"
+    },
+    {
+      "fieldname": "column_break_pyyz",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break_dcwj",
+      "fieldtype": "Section Break"
+    }
+  ],
+  "is_submittable": 1,
+  "links": [
+    {
+      "link_doctype": "Sales Visit Log",
+      "link_fieldname": "naming_series"
+    },
+    {
+      "link_doctype": "Check-in Tracker",
+      "link_fieldname": "naming_series"
+    }
+  ],
+  "modified": "2025-08-17 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Salesman Journey",
+  "name": "Journey Plan Template",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "role": "System Manager",
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "select": 1,
+      "share": 1,
+      "submit": 1,
+      "write": 1
+    },
+    {
+      "role": "Sales Supervisor",
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "share": 1,
+      "submit": 1,
+      "write": 1
+    },
+    {
+      "role": "Sales User",
+      "read": 1,
+      "print": 1,
+      "export": 1,
+      "report": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
+}

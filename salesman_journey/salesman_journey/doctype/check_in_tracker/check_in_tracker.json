@@ -1,0 +1,131 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2025-05-05 20:14:50.502535",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "status",
+  "naming_series",
+  "salesman",
+  "customer",
+  "check_in_time",
+  "check_out_time",
+  "latitude",
+  "longitude",
+  "location_accuracy",
+  "visit_log",
+  "notes",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "salesman",
+   "fieldtype": "Link",
+   "label": "Salesman",
+   "options": "User"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "check_in_time",
+   "fieldtype": "Datetime",
+   "label": "Check-In Time"
+  },
+  {
+   "fieldname": "check_out_time",
+   "fieldtype": "Datetime",
+   "label": "Check-Out Time"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude"
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude"
+  },
+  {
+   "fieldname": "location_accuracy",
+   "fieldtype": "Float",
+   "label": "Location Accuracy (m)"
+  },
+  {
+   "fieldname": "visit_log",
+   "fieldtype": "Link",
+   "label": "Sales Visit Log",
+   "options": "Sales Visit Log"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Naming Series",
+   "options": "CHK-.DD.-.MM.-.YY.-"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Check-in Tracker",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "Check IN\nCheck Out",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Check IN\nCheck Out",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-05-12 16:14:22.379771",
+ "modified_by": "Administrator",
+ "module": "Salesman Journey",
+ "name": "Check-in Tracker",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Green",
+   "title": "Check IN"
+  },
+  {
+   "color": "Light Blue",
+   "title": "Check Out"
+  }
+ ]
+}
