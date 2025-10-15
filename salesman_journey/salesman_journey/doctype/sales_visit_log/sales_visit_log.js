@@ -26,7 +26,7 @@ frappe.ui.form.on('Sales Visit Log', {
   
               const distance = getDistanceFromLatLonInM(currentLat, currentLon, customerLat, customerLon);
   
-              if (distance > 100) {
+              if (distance > 20) {
                 frappe.msgprint(__('You are too far from the customer location (Distance: ' + distance.toFixed(2) + ' meters).'));
                 return;
               }
