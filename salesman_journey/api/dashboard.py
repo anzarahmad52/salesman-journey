@@ -1317,13 +1317,13 @@ def create_sales_order(**kwargs):
             if qty <= 0:
                 continue
 
-            # Try to get rate from Price List (Standard Selling or linked to customer)
+            # ✅ Get rate from Standard Selling price list (or linked to customer)
             price = frappe.db.get_value(
                 "Item Price",
                 {
                     "item_code": item_code,
                     "selling": 1,
-                    "price_list": "Standard Selling"  # You can customize based on customer
+                    "price_list": "Standard Selling"  # You can customize this if needed
                 },
                 "price_list_rate"
             ) or 0.0
@@ -1341,6 +1341,7 @@ def create_sales_order(**kwargs):
         if not valid_items:
             frappe.throw(_("No valid items with rates to create Sales Order."))
 
+        # ✅ Step 1: Create base Sales Order document
         doc = frappe.get_doc({
             "doctype": "Sales Order",
             "customer": customer,
@@ -1349,6 +1350,29 @@ def create_sales_order(**kwargs):
             "items": valid_items
         })
 
+        # ✅ Step 2: Auto-assign default tax template if none was passed or is empty
+        if not doc.taxes_and_charges:
+            default_template = frappe.db.get_value(
+                "Sales Taxes and Charges Template",
+                {
+                    "is_default": 1,
+                    "company": frappe.defaults.get_user_default("Company"),
+                },
+                "name"
+            )
+            if default_template:
+                doc.taxes_and_charges = default_template
+
+                # ✅ Also auto-append tax rows if template has no taxes (for Frappe Cloud issue)
+                tax_rows = frappe.get_all(
+                    "Sales Taxes and Charges",
+                    filters={"parent": default_template},
+                    fields=["charge_type", "account_head", "rate", "description"]
+                )
+                for t in tax_rows:
+                    doc.append("taxes", t)
+
+        # ✅ Step 3: Save and submit
         doc.insert(ignore_permissions=True)
         doc.submit()
 
@@ -1364,7 +1388,7 @@ def create_sales_order(**kwargs):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "create_sales_order Error")
         frappe.throw(_("Failed to create Sales Order: {0}").format(str(e)))
-@frappe.whitelist()
+
 def get_user_profile_data():
     user = frappe.session.user
     user_doc = frappe.get_doc("User", user)
@@ -4520,4 +4544,5 @@ def get_financial_closing_summary(date=None, salesman=None):
     # Calculate total sales
     result["total_sales"] = result["cash_total"] + result["mada_total"] + result["temp_credit_total"]
     
+
     return result
