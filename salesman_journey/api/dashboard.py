@@ -1317,15 +1317,15 @@ def create_sales_order(**kwargs):
             if qty <= 0:
                 continue
 
-            # ✅ Get rate from Standard Selling price list (or linked to customer)
+            # Get rate from Price List (Standard Selling or linked to customer)
             price = frappe.db.get_value(
                 "Item Price",
                 {
                     "item_code": item_code,
                     "selling": 1,
-                    "price_list": "Standard Selling"  # You can customize this if needed
+                    "price_list": "Standard Selling",
                 },
-                "price_list_rate"
+                "price_list_rate",
             ) or 0.0
 
             if not price:
@@ -1335,44 +1335,38 @@ def create_sales_order(**kwargs):
                 "item_code": item_code,
                 "qty": qty,
                 "rate": price,
-                "amount": price * qty
+                "amount": price * qty,
             })
 
         if not valid_items:
             frappe.throw(_("No valid items with rates to create Sales Order."))
 
-        # ✅ Step 1: Create base Sales Order document
+        # ------------------------------
+        # 🔧 Create Sales Order Doc
+        # ------------------------------
         doc = frappe.get_doc({
             "doctype": "Sales Order",
             "customer": customer,
             "delivery_date": delivery_date,
             "taxes_and_charges": taxes_and_charges,
-            "items": valid_items
+            "items": valid_items,
         })
 
-        # ✅ Step 2: Auto-assign default tax template if none was passed or is empty
-        if not doc.taxes_and_charges:
-            default_template = frappe.db.get_value(
-                "Sales Taxes and Charges Template",
-                {
-                    "is_default": 1,
-                    "company": frappe.defaults.get_user_default("Company"),
-                },
-                "name"
-            )
-            if default_template:
-                doc.taxes_and_charges = default_template
+        # ✅ Apply ERPNext's internal logic for tax & totals
+        try:
+            from erpnext.selling.doctype.sales_order.sales_order import SalesOrder
 
-                # ✅ Also auto-append tax rows if template has no taxes (for Frappe Cloud issue)
-                tax_rows = frappe.get_all(
-                    "Sales Taxes and Charges",
-                    filters={"parent": default_template},
-                    fields=["charge_type", "account_head", "rate", "description"]
-                )
-                for t in tax_rows:
-                    doc.append("taxes", t)
+            # Convert doc to actual SalesOrder object and trigger all default methods
+            so = SalesOrder(doc)
+            so.set_missing_values()
+            so.calculate_taxes_and_totals()
+            doc = so  # Replace with updated doc
 
-        # ✅ Step 3: Save and submit
+        except Exception as e:
+            frappe.log_error(frappe.get_traceback(), "Tax recalculation failed")
+            frappe.msgprint(_("Warning: Tax recalculation skipped due to error."))
+
+        # ✅ Insert and Submit
         doc.insert(ignore_permissions=True)
         doc.submit()
 
@@ -1382,7 +1376,7 @@ def create_sales_order(**kwargs):
             "net_total": doc.net_total,
             "grand_total": doc.grand_total,
             "total_taxes_and_charges": doc.total_taxes_and_charges,
-            "in_words": doc.in_words
+            "in_words": doc.in_words,
         }
 
     except Exception as e:
@@ -4546,3 +4540,4 @@ def get_financial_closing_summary(date=None, salesman=None):
     
 
     return result
+
