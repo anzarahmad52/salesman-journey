@@ -1296,81 +1296,81 @@ def _user_permissions(user: str, doctype: str) -> list[str]:
 #     except Exception as e:
 #         frappe.log_error(frappe.get_traceback(), "get_default_sales_tax_template Error")
 #         frappe.throw(_("Internal error while getting default tax template."))
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def create_sales_order(**kwargs):
     try:
-        customer = kwargs.get("customer")
-        delivery_date = kwargs.get("delivery_date")
-        taxes_and_charges = kwargs.get("taxes_and_charges")
-        items = kwargs.get("items")
+        # --- Handle both JSON and form-data payloads ---
+        if frappe.request and frappe.request.method == "POST":
+            data = frappe.request.get_json() or {}
+        else:
+            data = kwargs
 
-        items = frappe.parse_json(items) if isinstance(items, str) else items
+        customer = data.get("customer")
+        delivery_date = data.get("delivery_date")
+        taxes_and_charges = data.get("taxes_and_charges")
+        items = data.get("items")
 
-        if not items or not isinstance(items, list):
+        # --- Parse JSON string to list if needed ---
+        if isinstance(items, str):
+            items = frappe.parse_json(items)
+
+        if not items or not isinstance(items, list) or len(items) == 0:
             frappe.throw(_("No items provided"))
 
+        # --- Prepare item table ---
         valid_items = []
-
         for item in items:
             item_code = item.get("item_code")
             qty = float(item.get("qty") or 0)
-            if qty <= 0:
+            rate = float(item.get("rate") or 0)
+
+            if not item_code or qty <= 0:
                 continue
 
-            # Get rate from Price List (Standard Selling or linked to customer)
-            price = frappe.db.get_value(
-                "Item Price",
-                {
-                    "item_code": item_code,
-                    "selling": 1,
-                    "price_list": "Standard Selling",
-                },
-                "price_list_rate",
-            ) or 0.0
+            # If no rate given, try to fetch from Item Price
+            if rate <= 0:
+                rate = frappe.db.get_value(
+                    "Item Price",
+                    {"item_code": item_code, "price_list": "Standard Selling", "selling": 1},
+                    "price_list_rate"
+                ) or 0.0
 
-            if not price:
-                frappe.throw(_("Missing price for item: {0}").format(item_code))
+            if rate <= 0:
+                frappe.throw(_("Missing rate for item {0}").format(item_code))
 
             valid_items.append({
                 "item_code": item_code,
                 "qty": qty,
-                "rate": price,
-                "amount": price * qty,
+                "rate": rate,
+                "amount": rate * qty,
             })
 
         if not valid_items:
-            frappe.throw(_("No valid items with rates to create Sales Order."))
+            frappe.throw(_("No valid items to create Sales Order"))
 
-        # ------------------------------
-        # 🔧 Create Sales Order Doc
-        # ------------------------------
+        # --- Create Sales Order document ---
         doc = frappe.get_doc({
             "doctype": "Sales Order",
             "customer": customer,
             "delivery_date": delivery_date,
             "taxes_and_charges": taxes_and_charges,
-            "items": valid_items,
+            "items": valid_items
         })
 
-        # ✅ Apply ERPNext's internal logic for tax & totals
-        try:
-            from erpnext.selling.doctype.sales_order.sales_order import SalesOrder
+        # --- Ensure tax template & calculations apply properly ---
+        doc.set_missing_values()
+        doc.calculate_taxes_and_totals()
 
-            # Convert doc to actual SalesOrder object and trigger all default methods
-            so = SalesOrder(doc)
-            so.set_missing_values()
-            so.calculate_taxes_and_totals()
-            doc = so  # Replace with updated doc
-
-        except Exception as e:
-            frappe.log_error(frappe.get_traceback(), "Tax recalculation failed")
-            frappe.msgprint(_("Warning: Tax recalculation skipped due to error."))
-
-        # ✅ Insert and Submit
+        # --- Save and submit ---
         doc.insert(ignore_permissions=True)
         doc.submit()
 
+        frappe.db.commit()
+
+        frappe.logger().info(f"✅ Sales Order created via API: {doc.name} | Taxes: {doc.total_taxes_and_charges}")
+
         return {
+            "status": "success",
             "name": doc.name,
             "total": doc.total,
             "net_total": doc.net_total,
@@ -4540,4 +4540,5 @@ def get_financial_closing_summary(date=None, salesman=None):
     
 
     return result
+
 
