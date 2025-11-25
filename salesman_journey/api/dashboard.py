@@ -1383,16 +1383,92 @@ def _user_permissions(user: str, doctype: str) -> list[str]:
 #         frappe.log_error(frappe.get_traceback(), "create_sales_order Error")
 #         frappe.throw(_("Failed to create Sales Order: {0}").format(str(e)))
 
+# @frappe.whitelist()
+# def create_sales_order(**kwargs):
+#     try:
+#         customer = kwargs.get("customer")
+#         delivery_date = kwargs.get("delivery_date")
+#         taxes_and_charges = kwargs.get("taxes_and_charges")
+#         # customer_address = kwargs.get("customer_address")
+#         items = kwargs.get("items")
+
+#         items = frappe.parse_json(items) if isinstance(items, str) else items
+
+#         if not items or not isinstance(items, list):
+#             frappe.throw(_("No items provided"))
+
+#         valid_items = []
+
+#         for item in items:
+#             item_code = item.get("item_code")
+#             qty = float(item.get("qty") or 0)
+#             if qty <= 0:
+#                 continue
+
+#             # Try to get rate from Price List (Standard Selling or linked to customer)
+#             price = frappe.db.get_value(
+#                 "Item Price",
+#                 {
+#                     "item_code": item_code,
+#                     "selling": 1,
+#                     "price_list": "Standard Selling"  # You can customize based on customer
+#                 },
+#                 "price_list_rate"
+#             ) or 0.0
+
+#             if not price:
+#                 frappe.throw(_("Missing price for item: {0}").format(item_code))
+
+#             valid_items.append({
+#                 "item_code": item_code,
+#                 "qty": qty,
+#                 "rate": price,
+#                 "amount": price * qty
+#             })
+
+#         if not valid_items:
+#             frappe.throw(_("No valid items with rates to create Sales Order."))
+
+#         doc = frappe.get_doc({
+#             "doctype": "Sales Order",
+#             "customer": customer,
+#             "delivery_date": delivery_date,
+#             "taxes_and_charges": taxes_and_charges,
+#             # "customer_address": customer_address,
+#             "items": valid_items
+#         })
+
+#         doc.insert(ignore_permissions=True)
+#         doc.submit()
+
+#         return {
+#             "name": doc.name,
+#             "total": doc.total,
+#             "net_total": doc.net_total,
+#             "grand_total": doc.grand_total,
+#             "total_taxes_and_charges": doc.total_taxes_and_charges,
+#             "in_words": doc.in_words
+#         }
+
+#     except Exception as e:
+#         frappe.log_error(frappe.get_traceback(), "create_sales_order Error")
+#         frappe.throw(_("Failed to create Sales Order: {0}").format(str(e)))
+
 @frappe.whitelist()
 def create_sales_order(**kwargs):
     try:
         customer = kwargs.get("customer")
         delivery_date = kwargs.get("delivery_date")
         taxes_and_charges = kwargs.get("taxes_and_charges")
-        # customer_address = kwargs.get("customer_address")
         items = kwargs.get("items")
 
         items = frappe.parse_json(items) if isinstance(items, str) else items
+
+        if not customer:
+            frappe.throw(_("Customer is required"))
+
+        if not delivery_date:
+            frappe.throw(_("Delivery date is required"))
 
         if not items or not isinstance(items, list):
             frappe.throw(_("No items provided"))
@@ -1402,19 +1478,22 @@ def create_sales_order(**kwargs):
         for item in items:
             item_code = item.get("item_code")
             qty = float(item.get("qty") or 0)
+
+            if not item_code:
+                continue
+
             if qty <= 0:
                 continue
 
-            # Try to get rate from Price List (Standard Selling or linked to customer)
             price = frappe.db.get_value(
                 "Item Price",
                 {
                     "item_code": item_code,
                     "selling": 1,
-                    "price_list": "Standard Selling"  # You can customize based on customer
+                    "price_list": "Standard Selling"
                 },
                 "price_list_rate"
-            ) or 0.0
+            )
 
             if not price:
                 frappe.throw(_("Missing price for item: {0}").format(item_code))
@@ -1422,21 +1501,33 @@ def create_sales_order(**kwargs):
             valid_items.append({
                 "item_code": item_code,
                 "qty": qty,
-                "rate": price,
-                "amount": price * qty
+                "rate": price
             })
 
         if not valid_items:
             frappe.throw(_("No valid items with rates to create Sales Order."))
 
-        doc = frappe.get_doc({
-            "doctype": "Sales Order",
-            "customer": customer,
-            "delivery_date": delivery_date,
-            "taxes_and_charges": taxes_and_charges,
-            # "customer_address": customer_address,
-            "items": valid_items
-        })
+        doc = frappe.new_doc("Sales Order")
+        doc.customer = customer
+        doc.delivery_date = delivery_date
+        doc.taxes_and_charges = taxes_and_charges
+
+        for it in valid_items:
+            doc.append("items", it)
+
+        if taxes_and_charges:
+            tax_template = frappe.get_doc("Sales Taxes and Charges Template", taxes_and_charges)
+            doc.taxes = []
+
+            for t in tax_template.taxes:
+                doc.append("taxes", {
+                    "charge_type": t.charge_type,
+                    "account_head": t.account_head,
+                    "rate": t.rate,
+                    "description": t.description
+                })
+
+        doc.calculate_taxes_and_totals()
 
         doc.insert(ignore_permissions=True)
         doc.submit()
@@ -1447,13 +1538,12 @@ def create_sales_order(**kwargs):
             "net_total": doc.net_total,
             "grand_total": doc.grand_total,
             "total_taxes_and_charges": doc.total_taxes_and_charges,
-            "in_words": doc.in_words
+            "in_words": doc.in_words,
         }
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "create_sales_order Error")
         frappe.throw(_("Failed to create Sales Order: {0}").format(str(e)))
-
 
 @frappe.whitelist()
 def get_user_profile_data():
@@ -4613,6 +4703,7 @@ def get_financial_closing_summary(date=None, salesman=None):
     
 
     return result
+
 
 
 
