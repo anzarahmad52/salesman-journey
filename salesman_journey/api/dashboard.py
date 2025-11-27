@@ -1226,13 +1226,13 @@ def create_sales_order(**kwargs):
                 "price_list_rate"
             )
 
-            if not price:
-                frappe.throw(_("Missing price for item: {0}").format(item_code))
+            # if not price:
+            #     frappe.throw(_("Missing price for item: {0}").format(item_code))
 
             valid_items.append({
                 "item_code": item_code,
                 "qty": qty,
-                "rate": price
+                # "rate": price
             })
 
         if not valid_items:
@@ -4573,6 +4573,7 @@ def get_financial_closing_summary(date=None, salesman=None):
     
 
     return result
+
 
 
 
