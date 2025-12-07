@@ -1215,7 +1215,7 @@ def create_sales_order(**kwargs):
             valid_items.append({
                 "item_code": item_code,
                 "qty": qty,
-                "uom": "Nos"   
+                "uom": "PCS"   
             })
 
         if not valid_items:
@@ -4321,7 +4321,7 @@ def get_salesman_daily_closing_inventory(date=None, warehouse=None, salesman_use
                 {
                     "item_code": "ITEM-001",
                     "item_name": "Sample Item",
-                    "uom": "Nos",
+                    "uom": "PCS",
                     "opening_qty": 10.0,        # Opening stock at the start of the day
                     "loading_request_qty": 5.0,  # Quantity requested in loading requests
                     "sold_qty": 3.0,            # Total quantity sold (out_qty)
@@ -4654,6 +4654,7 @@ def get_financial_closing_summary(date=None, salesman=None):
     
 
     return result
+
 
 
 
