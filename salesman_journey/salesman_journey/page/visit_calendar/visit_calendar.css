@@ -1,0 +1,107 @@
+.visit-cal-wrap {
+  padding: 10px 0;
+}
+
+.visit-cal-toolbar {
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--card-bg);
+}
+
+.vc-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.vc-field {
+  min-width: 180px;
+}
+
+.vc-field label {
+  font-size: 12px;
+  margin-bottom: 4px;
+  display: block;
+  opacity: 0.8;
+}
+
+.vc-actions {
+  margin-left: auto;
+}
+
+.vc-month-title {
+  font-weight: 600;
+  margin: 6px 0 10px;
+}
+
+.vc-table th {
+  text-align: center;
+  font-weight: 600;
+}
+
+.vc-empty {
+  background: #fafafa;
+  height: 120px;
+}
+
+.vc-day {
+  cursor: pointer;
+  vertical-align: top;
+  height: 145px;
+}
+
+.vc-day-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vc-day-num {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.vc-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+}
+
+.vc-good { background: #eaffea; }
+.vc-bad { background: #ffecec; }
+.vc-neutral { background: #f2f2f2; }
+
+.vc-stats {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.vc-actions-row {
+  margin-top: 8px;
+}
+
+/* ✅ NEW: color coding */
+.vc-completed {
+  color: #1f8f3a; /* green */
+  font-weight: 700;
+}
+
+.vc-missed {
+  color: #d93b3b; /* red */
+  font-weight: 700;
+}
+
+.vc-acc {
+  font-weight: 700;
+}
+
+.vc-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.75;
+}

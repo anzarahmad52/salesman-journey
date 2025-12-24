@@ -1,0 +1,13 @@
+{
+  "doctype": "Page",
+  "name": "visit-calendar",
+  "title": "Visit Calendar",
+  "module": "Salesman Journey",
+  "icon": "calendar",
+  "standard": 1,
+  "roles": [
+    { "role": "System Manager" },
+    { "role": "Sales Supervisor" },
+    { "role": "Sales User" }
+  ]
+}

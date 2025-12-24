@@ -184,6 +184,31 @@ def resolve_sales_persons_for_user(user_id):
             sales_persons.append(s)
     return sales_persons
 
+# def resolve_sales_persons_for_user(user_id):
+#     """Map a User -> Sales Person(s) using Employee link(s) if present."""
+#     if not user_id:
+#         return []
+
+#     sales_persons = []
+
+#     emp = frappe.db.get_value("Employee", {"user_id": user_id}, ["name"], as_dict=True)
+#     if not emp:
+#         return sales_persons
+
+#     # Safe: only fetch sales_person if column exists
+#     if frappe.db.has_column("Employee", "sales_person"):
+#         sp = frappe.db.get_value("Employee", emp.name, "sales_person")
+#         if sp:
+#             sales_persons.append(sp)
+
+#     # Extra link from Sales Person table
+#     extra = frappe.db.get_all("Sales Person", {"employee": emp.name}, pluck="name")
+#     for s in extra:
+#         if s not in sales_persons:
+#             sales_persons.append(s)
+
+#     return sales_persons
+
 def get_voucher_wise_sales(warehouse, day_start, day_end, sales_persons, salesman_user, item_code=None):
     """
     Submitted non-return Sales Invoices in date range for this warehouse.

@@ -4,12 +4,21 @@
   "doctype": "DocType",
   "engine": "InnoDB",
   "field_order": [
+    "week_no",
     "day_of_week",
     "customer",
     "time_slot",
     "expected_duration"
   ],
   "fields": [
+    {
+      "fieldname": "week_no",
+      "fieldtype": "Int",
+      "label": "Week No",
+      "reqd": 1,
+      "in_list_view": 1,
+      "description": "Week number inside the cycle (1..Number of Weeks)."
+    },
     {
       "fieldname": "day_of_week",
       "fieldtype": "Select",

@@ -1,0 +1,10 @@
+{
+  "doctype": "Report",
+  "name": "Customer Coverage",
+  "report_name": "Customer Coverage",
+  "ref_doctype": "Customer",
+  "is_standard": "Yes",
+  "report_type": "Script Report",
+  "disabled": 0,
+  "module": "Salesman Journey"
+}
