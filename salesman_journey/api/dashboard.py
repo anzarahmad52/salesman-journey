@@ -1312,6 +1312,16 @@ def create_sales_order(**kwargs):
         taxes_and_charges = data.get("taxes_and_charges")
         items = data.get("items")
 
+        # 🔹 NEW: Resolve company (payload → user default → global default)
+        company = (
+            data.get("company")
+            or frappe.defaults.get_user_default("Company")
+            or frappe.db.get_single_value("Global Defaults", "default_company")
+        )
+
+        if not company:
+            frappe.throw(_("Company is required to create Sales Order"))
+
         # --- Parse JSON string to list if needed ---
         if isinstance(items, str):
             items = frappe.parse_json(items)
@@ -1355,13 +1365,14 @@ def create_sales_order(**kwargs):
         doc = frappe.get_doc({
             "doctype": "Sales Order",
             "customer": customer,
+            "company": company,          # 🔹 IMPORTANT: set company here
             "delivery_date": delivery_date,
             "taxes_and_charges": taxes_and_charges,
-            "items": valid_items
+            "items": valid_items,
         })
 
         # --- Ensure tax template & calculations apply properly ---
-        doc.set_missing_values()
+        doc.set_missing_values()        # now get_item_details sees doc.company
         doc.calculate_taxes_and_totals()
 
         doc.insert(ignore_permissions=True)
@@ -1386,35 +1397,123 @@ def create_sales_order(**kwargs):
         frappe.log_error(frappe.get_traceback(), "create_sales_order Error")
         frappe.throw(_("Failed to create Sales Order: {0}").format(str(e)))
 
-def get_user_profile_data():
-    user = frappe.session.user
-    user_doc = frappe.get_doc("User", user)
+# @frappe.whitelist(allow_guest=False)
+# def create_sales_order(**kwargs):
+#     try:
+#         # --- Handle both JSON and form-data payloads ---
+#         if frappe.request and frappe.request.method == "POST":
+#             data = frappe.request.get_json() or {}
+#         else:
+#             data = kwargs
 
-    cost_centers = frappe.get_all(
-        "User Permission",
-        filters={
-            "user": user,
-            "allow": "Cost Center"
-        },
-        pluck="for_value"
-    )
+#         customer = data.get("customer")
+#         delivery_date = data.get("delivery_date")
+#         taxes_and_charges = data.get("taxes_and_charges")
+#         items = data.get("items")
 
-    # Optional: get only first if single allowed
-    default_cost_center = cost_centers[0] if cost_centers else None
+#         # --- Parse JSON string to list if needed ---
+#         if isinstance(items, str):
+#             items = frappe.parse_json(items)
 
-    return {
-        "full_name": user_doc.full_name,
-        "email": user_doc.email,
-        "roles": [role.role for role in user_doc.roles],
-        "territories": frappe.get_all(
-            "User Permission",
-            filters={"user": user, "allow": "Territory"},
-            pluck="for_value"
-        ),
-        "cost_centers": cost_centers,
-        "default_cost_center": default_cost_center,
-        # Add anything else needed
-    }
+#         if not items or not isinstance(items, list):
+#             frappe.throw(_("No items provided"))
+
+#         # --- Prepare item table ---
+#         valid_items = []
+
+#         for item in items:
+#             item_code = item.get("item_code")
+#             qty = float(item.get("qty") or 0)
+#             rate = float(item.get("rate") or 0)
+
+#             if not item_code:
+#                 continue
+
+#             # If no rate given, try to fetch from Item Price
+#             if rate <= 0:
+#                 rate = frappe.db.get_value(
+#                     "Item Price",
+#                     {"item_code": item_code, "price_list": "Standard Selling", "selling": 1},
+#                     "price_list_rate"
+#                 ) or 0.0
+
+#             if rate <= 0:
+#                 frappe.throw(_("Missing rate for item {0}").format(item_code))
+
+#             valid_items.append({
+#                 "item_code": item_code,
+#                 "qty": qty,
+#                 "rate": rate,
+#                 "amount": rate * qty,
+#             })
+
+#         if not valid_items:
+#             frappe.throw(_("No valid items to create Sales Order"))
+
+#         # --- Create Sales Order document ---
+#         doc = frappe.get_doc({
+#             "doctype": "Sales Order",
+#             "customer": customer,
+#             "delivery_date": delivery_date,
+#             "taxes_and_charges": taxes_and_charges,
+#             "items": valid_items
+#         })
+
+#         # --- Ensure tax template & calculations apply properly ---
+#         doc.set_missing_values()
+#         doc.calculate_taxes_and_totals()
+
+#         doc.insert(ignore_permissions=True)
+#         doc.submit()
+
+#         frappe.db.commit()
+
+#         frappe.logger().info(f"✅ Sales Order created via API: {doc.name} | Taxes: {doc.total_taxes_and_charges}")
+
+#         return {
+#             "name": doc.name,
+#             "company": doc.company,
+#             "price_list": doc.selling_price_list,
+#             "total": doc.total,
+#             "net_total": doc.net_total,
+#             "grand_total": doc.grand_total,
+#             "total_taxes_and_charges": doc.total_taxes_and_charges,
+#             "in_words": doc.in_words,
+#         }
+
+#     except Exception as e:
+#         frappe.log_error(frappe.get_traceback(), "create_sales_order Error")
+#         frappe.throw(_("Failed to create Sales Order: {0}").format(str(e)))
+
+# def get_user_profile_data():
+#     user = frappe.session.user
+#     user_doc = frappe.get_doc("User", user)
+
+#     cost_centers = frappe.get_all(
+#         "User Permission",
+#         filters={
+#             "user": user,
+#             "allow": "Cost Center"
+#         },
+#         pluck="for_value"
+#     )
+
+#     # Optional: get only first if single allowed
+#     default_cost_center = cost_centers[0] if cost_centers else None
+
+#     return {
+#         "full_name": user_doc.full_name,
+#         "email": user_doc.email,
+#         "roles": [role.role for role in user_doc.roles],
+#         "territories": frappe.get_all(
+#             "User Permission",
+#             filters={"user": user, "allow": "Territory"},
+#             pluck="for_value"
+#         ),
+#         "cost_centers": cost_centers,
+#         "default_cost_center": default_cost_center,
+#         # Add anything else needed
+#     }
 @frappe.whitelist()
 def get_payment_account(mode_of_payment):
     account = frappe.db.get_value("Mode of Payment Account",
@@ -10907,4 +11006,5 @@ def submit_salesman_closing_voucher(name, salesman=None, posting_date=None, **kw
         
 #     except Exception as e:
 #         frappe.log_error(frappe.get_traceback(), "Closing Voucher Modification Request Error")
+
 #         frappe.throw(_(f"Error requesting modification: {str(e)}"))
